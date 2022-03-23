@@ -1,5 +1,5 @@
 # absolute path that contains all datasets
-DATA_ROOT=/media/bjw/Disk/release_depth_data
+DATA_ROOT=datasets
 
 # # kitti
 # DATASET=$DATA_ROOT/kitti

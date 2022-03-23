@@ -6,6 +6,8 @@ import numpy as np
 
 from .inverse_warp import inverse_warp2
 
+import IPython.terminal.debugger as Debug
+
 device = torch.device(
     "cuda") if torch.cuda.is_available() else torch.device("cpu")
 
@@ -169,7 +171,6 @@ def compute_smooth_loss(tgt_depth, tgt_img):
 def compute_errors(gt, pred, dataset):
     # pred : b c h w
     # gt: b h w
-
     abs_diff = abs_rel = sq_rel = log10 = rmse = rmse_log = a1 = a2 = a3 = 0.0
 
     batch_size, h, w = gt.size()
@@ -188,8 +189,10 @@ def compute_errors(gt, pred, dataset):
 
     if dataset == 'nyu':
         crop_mask = gt[0] != gt[0]
-        crop = np.array([45, 471, 41, 601]).astype(np.int32)
-        crop_mask[crop[0]:crop[1], crop[2]:crop[3]] = 1
+        # todo: uncomment to adapt to ours
+        # crop = np.array([45, 471, 41, 601]).astype(np.int32)
+        # crop_mask[crop[0]:crop[1], crop[2]:crop[3]] = 1
+        crop_mask[:, :] = 1
         max_depth = 10
 
     if dataset == 'ddad':
@@ -204,6 +207,10 @@ def compute_errors(gt, pred, dataset):
 
         valid_gt = current_gt[valid]
         valid_pred = current_pred[valid]
+
+        # to avoid break of training
+        if valid_pred.numel() == 0:
+            continue
 
         # align scale
         valid_pred = valid_pred * \

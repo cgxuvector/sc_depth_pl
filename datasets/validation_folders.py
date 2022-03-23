@@ -50,8 +50,10 @@ class ValidationSet(data.Dataset):
         img = imread(self.imgs[index]).astype(np.float32)
 
         if self.dataset == 'nyu':
+            # depth = torch.from_numpy(
+            #     imread(self.depth[index]).astype(np.float32)).float()/5000
             depth = torch.from_numpy(
-                imread(self.depth[index]).astype(np.float32)).float()/5000
+                imread(self.depth[index]).astype(np.float32)).float() * 10 / 255.0  # todo: for our case
         elif self.dataset == 'kitti' or self.dataset == 'ddad':
             depth = torch.from_numpy(load_sparse_depth(
                 self.depth[index]).astype(np.float32))

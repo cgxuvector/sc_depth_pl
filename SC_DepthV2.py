@@ -15,6 +15,8 @@ from models.PoseNet import PoseNet
 from models.RectifyNet import RectifyNet
 from visualization import *
 
+import IPython.terminal.debugger as Debug
+
 
 class SC_DepthV2(LightningModule):
     def __init__(self, hparams):

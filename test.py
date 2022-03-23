@@ -16,6 +16,8 @@ from losses.loss_functions import compute_errors
 
 from visualization import *
 
+import IPython.terminal.debugger as Debug
+
 
 @torch.no_grad()
 def main():
@@ -61,7 +63,6 @@ def main():
     all_errs = []
     for i, (tgt_img, gt_depth) in enumerate(tqdm(test_loader)):
         pred_depth = model.inference_depth(tgt_img.cuda())
-
         errs = compute_errors(gt_depth.cuda(), pred_depth,
                               hparams.dataset_name)
 
