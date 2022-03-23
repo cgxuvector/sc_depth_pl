@@ -233,4 +233,13 @@ def compute_errors(gt, pred, dataset):
         log10 += torch.mean(torch.abs((torch.log10(valid_gt) -
                             torch.log10(valid_pred))))
 
-    return [metric.item() / batch_size for metric in [abs_diff, abs_rel, sq_rel, log10, rmse, rmse_log, a1, a2, a3]]
+        # todo: modified the code to avoid error
+        metric_list = []
+        for metric in [abs_diff, abs_rel, sq_rel, log10, rmse, rmse_log, a1, a2, a3]:
+            if isinstance(metric, float):
+                metric_list.append(metric / batch_size)
+
+            if isinstance(metric, torch.Tensor):
+                metric_list.append(metric.item() / batch_size)
+
+    return metric_list
