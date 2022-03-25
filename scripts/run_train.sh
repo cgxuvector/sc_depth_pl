@@ -8,4 +8,7 @@ DATASET=$DATA_ROOT/replica_v1
 #ATASET=datasets/nyu
 CONFIG=configs/v2/nyu.txt
 
-python train.py --config $CONFIG --dataset_dir $DATASET
+# training options
+EXPNAME=habitat_replica_b8
+
+python train.py --config $CONFIG --dataset_dir $DATASET --exp_name $EXPNAME

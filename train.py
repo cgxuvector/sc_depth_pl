@@ -8,14 +8,20 @@ from config import get_opts
 from SC_Depth import SC_Depth
 from SC_DepthV2 import SC_DepthV2
 
+import IPython.terminal.debugger as Debug
+
+
 if __name__ == '__main__':
+    # get training hyper parameters
     hparams = get_opts()
 
+    # create the system
     if hparams.model_version == 'v1':
         system = SC_Depth(hparams)
     elif hparams.model_version == 'v2':
         system = SC_DepthV2(hparams)
 
+    # create the log files
     logger = TestTubeLogger(
         save_dir="ckpts",
         name=hparams.exp_name,

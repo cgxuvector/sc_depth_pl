@@ -11,7 +11,7 @@ def get_opts():
     # dataset
     parser.add_argument('--dataset_dir', type=str)
     parser.add_argument('--dataset_name', type=str,
-                        default='kitti', choices=['kitti', 'nyu', 'ddad'])
+                        default='kitti', choices=['kitti', 'nyu', 'ddad', 'habitat-replica', 'habitat-gibson'])
     parser.add_argument('--sequence_length', type=int,
                         default=3, help='number of images for training')
     parser.add_argument('--skip_frames', type=int, default=1,
@@ -66,5 +66,8 @@ def get_opts():
                         help='save depth visualization')
     parser.add_argument('--save-depth', action='store_true',
                         help='save depth with factor 1000')
+
+    # # device
+    # parser.add_argument("--device", type=str, help="device used to train")
 
     return parser.parse_args()
