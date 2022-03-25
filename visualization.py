@@ -17,6 +17,7 @@ def visualize_depth(depth, cmap=cv2.COLORMAP_JET):
     """
     depth: (H, W)
     """
+    cmap = cv2.COLORMAP_BONE # set the color map to be depth colormap
     x = depth.cpu().numpy()
     x = np.nan_to_num(x)  # change nan to 0
     mi = np.min(x)  # get minimum depth
