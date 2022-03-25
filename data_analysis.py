@@ -23,7 +23,7 @@ for idx, (c_n, d_n) in enumerate(zip(color_img_names, depth_img_names)):
 
     # convert to array
     color_img_arr = np.array(color_img)
-    depth_img_arr = np.array(depth_img) / 5000  # todo: unclear why the data is divided by 5000?
+    depth_img_arr = np.array(depth_img) / 5000  # todo: unclear why the data is divided by 5000?: it is a ratio.
 
     # show the data
     fig, arr = plt.subplots(1, 2)

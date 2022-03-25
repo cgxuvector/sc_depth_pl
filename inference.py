@@ -1,6 +1,4 @@
-import numpy as np
 from tqdm import tqdm
-import torch
 from imageio import imread, imwrite
 from path import Path
 import os
@@ -16,13 +14,19 @@ from skimage.transform import resize
 
 from visualization import *
 
+import IPython.terminal.debugger as Debug
+
 
 @torch.no_grad()
 def main():
     hparams = get_opts()
 
-    hparams.input_dir = "demo/input/habitat_room_0/"
+    env_name = "room_0"
+    hparams.input_dir = f"demo/input/habitat_{env_name}/"
     hparams.dataset_name = "nyu"
+    hparams.output_dir = "demo/output/"
+    hparams.config = "configs/v2/nyu.txt"
+    hparams.ckpt_path = "ckpts/nyu_scv2/version_3/epoch=192-val_loss=0.5880.ckpt"
 
     if hparams.model_version == 'v1':
         system = SC_Depth(hparams)
@@ -65,47 +69,52 @@ def main():
 
     print('{} images for inference'.format(len(image_files)))
 
+    # create figures
+    fig, arr = plt.subplots(1, 3, figsize=(12, 8))
+    artist_1, artist_2, artist_3 = None, None, None
     for i, img_file in enumerate(tqdm(image_files)):
-
-        filename = os.path.splitext(os.path.basename(img_file))[0]
-
+        img_file = Path(f'demo/input/habitat_{env_name}/0{i+1}.jpg')  # file path
+        rgb_img = resize(imread(img_file).astype(np.uint8), (256, 320))  # rgb image
         img = imread(img_file).astype(np.float32)
         tensor_img = inference_transform([img])[0][0].unsqueeze(0).cuda()
         pred_depth = model.inference_depth(tensor_img)
 
-        # vis_depth = visualize_depth(pred_depth[0, 0])
-        # vis_depth = vis_depth.cpu().numpy().transpose(1, 2, 0)
-
-        vis_rgb = tensor_img.cpu().squeeze(dim=0).permute(1, 2, 0).numpy()
+        vis_rgb = rgb_img
         vis_depth = pred_depth.cpu().squeeze(dim=0).squeeze(dim=0).numpy()
-        vis_gt_depth = resize(np.load(f"./demo/input/habitat_room_0/0{i+1}.npy"), [256, 320])
+        print(f"./demo/input/habitat_{env_name}/0{i+1}.npy")
+        vis_gt_depth = resize(np.load(f"./demo/input/habitat_{env_name}/0{i+1}.npy"), [256, 320])
 
         # rescale the vis_depth
-        vis_depth = vis_depth * (np.median(vis_gt_depth) / np.median(vis_depth))
-        print(f"pred depth - {vis_depth.min()} - {vis_depth.max()}")
+        # vis_depth = vis_depth * (np.median(vis_gt_depth) / np.median(vis_depth))
+        print(f"pred depth - {vis_depth.min()} - {vis_depth.max()} ")
         print(f"GT depth - {vis_gt_depth.min()} - {vis_gt_depth.max()}")
 
-        fig, arr = plt.subplots(1, 3)
-        arr[0].set_title("RGB")
-        arr[0].imshow(vis_rgb)
-        arr[0].axis("off")
-        arr[1].set_title("Pred Depth (Relative-scale-consistent)")
-        arr[1].imshow(vis_depth)
-        arr[1].axis("off")
-        arr[2].set_title("GT Depth")
-        arr[2].imshow(vis_gt_depth)
-        arr[2].axis("off")
-        plt.show()
-
-        # if hparams.save_vis:
-        #     vis = visualize_depth(pred_depth[0, 0]).permute(
-        #         1, 2, 0).numpy() * 255
-        #     imwrite(output_dir/'vis/{}.jpg'.format(filename),
-        #             vis.astype(np.uint8))
-        #
-        # if hparams.save_depth:
-        #     depth = pred_depth[0, 0].cpu().numpy()
-        #     np.save(output_dir/'depth/{}.npy'.format(filename), depth)
+        if i == 0:
+            arr[0].set_title("RGB")
+            artist_1 = arr[0].imshow(vis_rgb)
+            arr[0].axis("off")
+            vmin = str(np.round(vis_depth.min(), 2))
+            vmax = str(np.round(vis_depth.max(), 2))
+            arr[1].set_title(f"Pred Depth - {vmin}/{vmax}")
+            artist_2 = arr[1].imshow(vis_depth, cmap="gray")
+            arr[1].axis("off")
+            vmin = str(np.round(vis_gt_depth.min(), 2))
+            vmax = str(np.round(vis_gt_depth.max(), 2))
+            arr[2].set_title(f"GT Depth - {vmin}/{vmax}")
+            artist_3 = arr[2].imshow(vis_gt_depth, cmap="gray")
+            arr[2].axis("off")
+        else:
+            artist_1.set_data(vis_rgb)
+            vmin = str(np.round(vis_depth.min(), 2))
+            vmax = str(np.round(vis_depth.max(), 2))
+            arr[1].set_title(f"Pred Depth - {vmin}/{vmax}")
+            artist_2.set_data(vis_depth)
+            vmin = str(np.round(vis_gt_depth.min(), 2))
+            vmax = str(np.round(vis_gt_depth.max(), 2))
+            arr[2].set_title(f"GT Depth - {vmin}/{vmax}")
+            artist_3.set_data(vis_gt_depth)
+        fig.canvas.draw()
+        plt.pause(0.7)
 
 
 if __name__ == '__main__':
